@@ -82,7 +82,6 @@
       color: #fff;
     }
 
-    /* Main Grid Layout */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -110,7 +109,6 @@
       padding-bottom: 10px;
     }
 
-    /* Server Clock Card */
     .server-clock-box {
       text-align: center;
       background: rgba(230, 57, 70, 0.1);
@@ -150,7 +148,6 @@
       transition: width 1s linear;
     }
 
-    /* World Clocks List */
     .world-clock-list {
       display: flex;
       flex-direction: column;
@@ -183,7 +180,6 @@
       color: var(--accent-orange);
     }
 
-    /* Interactive Converter */
     .converter-group {
       display: flex;
       flex-direction: column;
@@ -237,3 +233,342 @@
       padding: 10px;
       border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .copy-btn:hover {
+      background: #218378;
+    }
+
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .schedule-table th, .schedule-table td {
+      border: 1px solid var(--card-border);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .schedule-table th {
+      background: #232731;
+      color: var(--accent-orange);
+    }
+
+    .schedule-table tr:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--card-border);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1><i class="fa-solid fa-biohazard"></i> LAST Z: <span>TIME CONVERTER</span></h1>
+    </div>
+    <div class="lang-switch">
+      <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">EN</button>
+      <button class="lang-btn" id="btn-ko" onclick="setLanguage('ko')">KR</button>
+    </div>
+  </header>
+
+  <div class="grid-container">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-clock"></i> <span data-i18n="serverClockTitle">Apocalypse Time (UTC-2)</span>
+      </div>
+      <div class="server-clock-box">
+        <div class="server-clock" id="serverClock">00:00:00</div>
+        <div style="font-size: 0.85rem; color: var(--text-sub); margin-top: 5px;" data-i18n="officialServerTime">Official Game Server Clock</div>
+      </div>
+      <div style="text-align: center;">
+        <div class="reset-timer" id="resetCountdown">--:--:--</div>
+        <div style="font-size: 0.85rem; color: var(--text-sub);" data-i18n="resetSubtext">Until Daily Reset (00:00 Server Time)</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="resetProgress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-calculator"></i> <span data-i18n="converterTitle">Alliance Operation Time Converter</span>
+      </div>
+      <div class="converter-group">
+        <label style="font-size: 0.9rem;" data-i18n="selectServerTime">Select Server Time (UTC-2):</label>
+        <div class="input-row">
+          <input type="time" id="inputServerTime" value="18:00">
+          <button class="btn" onclick="convertCustomTime()" data-i18n="convertBtn">Convert</button>
+        </div>
+        <div class="converted-results" id="convertedResults"></div>
+        <button class="copy-btn" onclick="copyAllianceChat()" data-i18n="copyBtn">
+          <i class="fa-regular fa-copy"></i> Copy for Alliance Chat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 25px;">
+    <div class="card-header">
+      <i class="fa-solid fa-globe"></i> <span data-i18n="worldClockTitle">Synchronized World Clocks</span>
+    </div>
+    <div class="world-clock-list" id="worldClockList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <i class="fa-solid fa-calendar-days"></i> <span data-i18n="eventScheduleTitle">4-Hour Full Preparedness Event Rotation</span>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px;" data-i18n="eventSubtext">
+      Matches 4-hour event rotation blocks across major global timezones.
+    </p>
+    <div style="overflow-x: auto;">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th data-i18n="thBlock">Block</th>
+            <th>Server (UTC-2)</th>
+            <th>Korea/Japan (KST)</th>
+            <th>SE Asia (ICT)</th>
+            <th>Europe (CEST)</th>
+            <th>US East (EDT)</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    Last Z: Survival Shooter Fan-made Helper Tool &copy; 2026. All Server Times Based on UTC-2.
+  </footer>
+
+  <script>
+    const i18n = {
+      en: {
+        serverClockTitle: "Apocalypse Time (UTC-2)",
+        officialServerTime: "Official Game Server Clock",
+        resetSubtext: "Until Daily Reset (00:00 Server Time)",
+        converterTitle: "Alliance Operation Time Converter",
+        selectServerTime: "Select Server Time (UTC-2):",
+        convertBtn: "Convert",
+        copyBtn: "Copy for Alliance Chat",
+        worldClockTitle: "Synchronized World Clocks",
+        eventScheduleTitle: "4-Hour Full Preparedness Event Rotation",
+        eventSubtext: "Matches 4-hour event rotation blocks across major global timezones.",
+        thBlock: "Block",
+        copiedToast: "Alliance chat snippet copied to clipboard!"
+      },
+      ko: {
+        serverClockTitle: "게임 서버 시각 (아포칼립스 타임, UTC-2)",
+        officialServerTime: "실시간 공식 게임 서버 시간",
+        resetSubtext: "일일 리셋(서버 00:00)까지 남은 시간",
+        converterTitle: "연맹 작전 시각 환산기",
+        selectServerTime: "게임 서버 시간 선택 (UTC-2):",
+        convertBtn: "변환",
+        copyBtn: "연맹 채팅용 텍스트 복사",
+        worldClockTitle: "전 세계 주요 지역 동기화 시계",
+        eventScheduleTitle: "4시간 주기 전면 대비 이벤트 로테이션",
+        eventSubtext: "주요 타임존별 4시간 블록 로테이션 시작 시각 안내",
+        thBlock: "블록",
+        copiedToast: "연맹 채팅용 텍스트가 클립보드에 복사되었습니다!"
+      }
+    };
+
+    let currentLang = 'en';
+
+    const regions = [
+      { id: 'server', nameEn: 'Game Server', nameKo: '게임 서버', zone: 'Etc/GMT+2', label: 'UTC-2' },
+      { id: 'kst', nameEn: 'Korea / Japan', nameKo: '대한민국 / 일본', zone: 'Asia/Seoul', label: 'KST (UTC+9)' },
+      { id: 'ict', nameEn: 'SE Asia (Thailand/Vietnam)', nameKo: '동남아 (태국/베트남)', zone: 'Asia/Bangkok', label: 'ICT (UTC+7)' },
+      { id: 'cest', nameEn: 'Europe (Germany/France)', nameKo: '유럽 (독일/프랑스)', zone: 'Europe/Berlin', label: 'CEST (UTC+2)' },
+      { id: 'edt', nameEn: 'US East (New York)', nameKo: '미국 동부 (뉴욕)', zone: 'America/New_York', label: 'EDT (UTC-4)' },
+      { id: 'pdt', nameEn: 'US West (Los Angeles)', nameKo: '미국 서부 (LA)', zone: 'America/Los_Angeles', label: 'PDT (UTC-7)' }
+    ];
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-${lang}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.querySelectorAll('[data-i18n]').forEach(elem => {
+        const key = elem.getAttribute('data-i18n');
+        if (i18n[lang] && i18n[lang][key]) {
+          elem.innerText = i18n[lang][key];
+        }
+      });
+
+      renderWorldClocks();
+      convertCustomTime();
+      renderSchedule();
+    }
+
+    function updateClocks() {
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const serverDate = new Date(utc + (3600000 * -2));
+
+      const h = String(serverDate.getHours()).padStart(2, '0');
+      const m = String(serverDate.getMinutes()).padStart(2, '0');
+      const s = String(serverDate.getSeconds()).padStart(2, '0');
+      
+      const serverClockEl = document.getElementById('serverClock');
+      if (serverClockEl) serverClockEl.innerText = `${h}:${m}:${s}`;
+
+      const nextReset = new Date(serverDate);
+      nextReset.setHours(24, 0, 0, 0);
+      const diffMs = nextReset - serverDate;
+      const diffSec = Math.floor(diffMs / 1000);
+
+      const rH = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+      const rM = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+      const rS = String(diffSec % 60).padStart(2, '0');
+
+      const resetCountdownEl = document.getElementById('resetCountdown');
+      if (resetCountdownEl) resetCountdownEl.innerText = `${rH}:${rM}:${rS}`;
+      
+      const progressPercent = ((86400 - diffSec) / 86400) * 100;
+      const resetProgressEl = document.getElementById('resetProgress');
+      if (resetProgressEl) resetProgressEl.style.width = `${progressPercent}%`;
+
+      regions.forEach(r => {
+        const el = document.getElementById(`time-${r.id}`);
+        if (el) {
+          try {
+            const timeStr = new Intl.DateTimeFormat('en-GB', {
+              timeZone: r.zone,
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            }).format(now);
+            el.innerText = timeStr;
+          } catch (e) {
+            el.innerText = "--:--:--";
+          }
+        }
+      });
+    }
+
+    function renderWorldClocks() {
+      const container = document.getElementById('worldClockList');
+      if (!container) return;
+      container.innerHTML = '';
+      regions.forEach(r => {
+        const name = currentLang === 'ko' ? r.nameKo : r.nameEn;
+        const row = document.createElement('div');
+        row.className = 'clock-row';
+        row.innerHTML = `
+          <div>
+            <div class="clock-location">${name}</div>
+            <div class="clock-timezone">${r.label}</div>
+          </div>
+          <div class="clock-time" id="time-${r.id}">--:--:--</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function convertCustomTime() {
+      const inputEl = document.getElementById('inputServerTime');
+      const resultsEl = document.getElementById('convertedResults');
+      if (!inputEl || !resultsEl) return;
+
+      const timeVal = inputEl.value;
+      if (!timeVal) return;
+
+      const [hours, minutes] = timeVal.split(':').map(Number);
+      const now = new Date();
+      const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hours + 2, minutes));
+
+      let resultHtml = `<div style="margin-bottom:8px; font-weight:bold; color:var(--accent-orange);">Server Time: ${timeVal} (UTC-2)</div>`;
+      const snippets = [];
+
+      regions.slice(1).forEach(r => {
+        let formatted = "--:--";
+        try {
+          formatted = new Intl.DateTimeFormat('en-GB', {
+            timeZone: r.zone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }).format(utcDate);
+        } catch(e){}
+
+        const name = currentLang === 'ko' ? r.nameKo : r.nameEn;
+        resultHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>${name} (${r.label.split(' ')[0]}):</span>
+          <span style="font-weight:bold; color:#fff;">${formatted}</span>
+        </div>`;
+
+        snippets.push(`${r.label.split(' ')[0]} ${formatted}`);
+      });
+
+      resultsEl.innerHTML = resultHtml;
+      resultsEl.dataset.snippet = `[Last Z Op] Server ${timeVal} = ` + snippets.join(' / ');
+    }
+
+    function copyAllianceChat() {
+      const resultsEl = document.getElementById('convertedResults');
+      if (!resultsEl) return;
+      const text = resultsEl.dataset.snippet;
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert(i18n[currentLang].copiedToast);
+      });
+    }
+
+    function renderSchedule() {
+      const tbody = document.getElementById('scheduleBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      for (let i = 0; i < 6; i++) {
+        const serverStartHour = i * 4;
+        const serverEndHour = (i * 4) + 4;
+        const sTime = `${String(serverStartHour).padStart(2,'0')}:00 - ${String(serverEndHour).padStart(2,'0')}:00`;
+
+        const kstStart = (serverStartHour + 11) % 24;
+        const ictStart = (serverStartHour + 9) % 24;
+        const cestStart = (serverStartHour + 4) % 24;
+        const edtStart = (serverStartHour + 22) % 24;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>Block ${i + 1}</td>
+          <td>${sTime}</td>
+          <td>${String(kstStart).padStart(2,'0')}:00</td>
+          <td>${String(ictStart).padStart(2,'0')}:00</td>
+          <td>${String(cestStart).padStart(2,'0')}:00</td>
+          <td>${String(edtStart).padStart(2,'0')}:00</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    // Initialize safely
+    document.addEventListener("DOMContentLoaded", function() {
+      renderWorldClocks();
+      renderSchedule();
+      updateClocks();
+      setInterval(updateClocks, 1000);
+      convertCustomTime();
+    });
+  </script>
+</body>
+</html>
